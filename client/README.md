@@ -107,9 +107,11 @@ npm run preview
 
 This project includes simple SVG placeholder images you can use to test responsiveness and layout during development. They live in the `public` folder so Vite will serve them directly.
 
-- Desktop placeholder: `/images/placeholders/desktop-placeholder.svg` (1200 × 700)
-- Mobile placeholder: `/images/placeholders/mobile-placeholder.svg` (375 × 667)
+- Desktop size: 
+<img src='./public/images/desktop-size.jpg' alt='desktop-size' width='900'>
 
+- Mobile size: 
+<img src='./public/images/mobile-size.jpg' alt='mobile-size' width='375 × 667'>
 There is a small demo section on the Home page titled **"Responsive image demo"** that shows both placeholders side-by-side. To view it:
 
 ```bash
