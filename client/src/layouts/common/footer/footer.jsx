@@ -212,9 +212,9 @@ const Footer = () => {
                 <strong>{loadingCounts ? "..." : writerCount}</strong> Active
                 Writers
               </span>
-              <span className="stat">
+              {/* <span className="stat">
                 <strong>{loadingCounts ? "..." : readerCount}</strong> Readers
-              </span>
+              </span> */}
 
              
             </div>
