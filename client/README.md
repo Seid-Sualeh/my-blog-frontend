@@ -103,6 +103,29 @@ npm run preview
 - `src/utils/configs/api-config.js` — API configuration (base URL)
 - `public/images/` — Static images served by Vite
 
+## Placeholders
+
+This project includes simple SVG placeholder images you can use to test responsiveness and layout during development. They live in the `public` folder so Vite will serve them directly.
+
+- Desktop placeholder: `/images/placeholders/desktop-placeholder.svg` (1200 × 700)
+- Mobile placeholder: `/images/placeholders/mobile-placeholder.svg` (375 × 667)
+
+There is a small demo section on the Home page titled **"Responsive image demo"** that shows both placeholders side-by-side. To view it:
+
+```bash
+cd client
+npm install
+npm run dev
+# open the dev URL (usually http://localhost:5173) and go to the Home page
+```
+
+If you prefer to preview the images directly in the browser, open these URLs while the dev server is running:
+
+- http://localhost:5173/images/placeholders/desktop-placeholder.svg
+- http://localhost:5173/images/placeholders/mobile-placeholder.svg
+
+If you'd like the placeholders included into other pages or components, import them as `/images/placeholders/<name>.svg` in your JSX `img` `src` attribute or use them as background images in CSS.
+
 ## Contributing
 
 Contributions are welcome. Suggested workflow:
@@ -128,4 +151,3 @@ Guidelines:
 This project is provided under the MIT License. Replace with your preferred license if different.
 
 ---
-
