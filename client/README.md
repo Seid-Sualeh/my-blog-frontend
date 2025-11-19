@@ -129,10 +129,3 @@ This project is provided under the MIT License. Replace with your preferred lice
 
 ---
 
-If you want, I can also:
-
-- Add a root README at repository root summarizing frontend + backend
-- Add a quick `CONTRIBUTING.md` or `CODE_OF_CONDUCT.md`
-- Set up basic GitHub Actions CI for linting/build
-
-If you want any of the above, tell me which and I will implement it.

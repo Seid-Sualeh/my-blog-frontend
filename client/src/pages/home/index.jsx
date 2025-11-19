@@ -253,6 +253,28 @@ const Home = () => {
           </div>
         )}
       </Modal>
+      {/* Responsive image demo for testing responsiveness */}
+      <section className="responsive-demo">
+        <h2>Responsive image demo</h2>
+        <div className="demo-grid">
+          <figure>
+            <img
+              src="/images/placeholders/desktop-placeholder.svg"
+              alt="Desktop placeholder"
+            />
+            <figcaption>Desktop (1200 × 700)</figcaption>
+          </figure>
+
+          <figure>
+            <img
+              src="/images/placeholders/mobile-placeholder.svg"
+              alt="Mobile placeholder"
+            />
+            <figcaption>Mobile (375 × 667)</figcaption>
+          </figure>
+        </div>
+      </section>
+
       <Footer />
     </div>
   );

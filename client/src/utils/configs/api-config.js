@@ -7,11 +7,10 @@
 // };
 
 export const API_CONFIG = {
-  // For development - connect to local backend
-  BASE_URL: "http://localhost:3000/api",
+  
 
-  // For production - you'll update this later
-  // BASE_URL: 'https://your-backend-url.herokuapp.com/api',
+  
+  BASE_URL: 'https://seid-blog-website.onrender.com/api',
 
   ENDPOINTS: {
     BLOGS: "/blog",
