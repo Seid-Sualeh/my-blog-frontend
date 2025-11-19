@@ -111,7 +111,7 @@ This project includes simple SVG placeholder images you can use to test responsi
 <img src='./public/images/desktop-size.jpg' alt='desktop-size' width='800  × 1200'>
 
 - Mobile size: 
-<img src='./public/images/mobile-size.jpg' alt='mobile-size' width='375 × 767'>
+<img src='../../public/images/mobile-size.jpg' alt='mobile-size' width='375 × 767'>
 There is a small demo section on the Home page titled **"Responsive image demo"** that shows both placeholders side-by-side. To view it:
 
 ```bash
