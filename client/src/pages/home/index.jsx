@@ -18,6 +18,13 @@ import { deleteWriter } from "../../service/blog/delete-writer";
 import Footer from "../../layouts/common/footer/footer";
 import "./home.css";
 
+/*************  ✨ Windsurf Command ⭐  *************/
+/**
+ * The Home component is the main entry point of the blog platform. It fetches data on mount and renders a tabbed interface for viewing blogs and writers. It also provides modal forms for creating and editing blog posts and writers.
+ *
+ * @returns {JSX.Element} The rendered Home component.
+ */
+/*******  ec14a46d-29ca-4a3c-a9db-6c8f0fcde562  *******/
 const Home = () => {
   // State management
   const [blogs, setBlogs] = useState([]);
@@ -253,27 +260,7 @@ const Home = () => {
           </div>
         )}
       </Modal>
-      {/* Responsive image demo for testing responsiveness */}
-      <section className="responsive-demo">
-        <h2>Responsive image demo</h2>
-        <div className="demo-grid">
-          <figure>
-            <img
-              src="/images/placeholders/desktop-placeholder.svg"
-              alt="Desktop placeholder"
-            />
-            <figcaption>Desktop (1200 × 700)</figcaption>
-          </figure>
-
-          <figure>
-            <img
-              src="/images/placeholders/mobile-placeholder.svg"
-              alt="Mobile placeholder"
-            />
-            <figcaption>Mobile (375 × 667)</figcaption>
-          </figure>
-        </div>
-      </section>
+     
 
       <Footer />
     </div>
