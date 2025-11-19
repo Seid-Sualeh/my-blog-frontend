@@ -1,0 +1,146 @@
+.writer-list {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.writer-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.writer-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.writer-avatar {
+  flex-shrink: 0;
+}
+
+.writer-avatar img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.writer-info {
+  flex: 1;
+}
+
+.writer-name {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.writer-email {
+  margin: 0 0 0.5rem 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.writer-blog-count {
+  margin: 0;
+  color: #667eea;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.writer-status {
+  flex-shrink: 0;
+}
+
+.status-active {
+  background: #d4edda;
+  color: #155724;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-inactive {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.writer-bio {
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  font-style: italic;
+}
+
+.writer-social-links {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.writer-social-links a {
+  color: #667eea;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.3s ease;
+}
+
+.writer-social-links a:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+.writer-meta {
+  margin-top: auto;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: #999;
+}
+
+.writer-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.writer-list-loading,
+.writer-list-empty {
+  text-align: center;
+  padding: 3rem;
+}
+
+@media (max-width: 768px) {
+  .writer-list {
+    grid-template-columns: 1fr;
+  }
+  
+  .writer-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .writer-actions {
+    justify-content: center;
+  }
+}
