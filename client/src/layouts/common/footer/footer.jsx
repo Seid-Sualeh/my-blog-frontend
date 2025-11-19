@@ -49,8 +49,8 @@ const Footer = () => {
 
 
 
-  // readers is not available from API; keep a placeholder or compute if available
-  const readersDisplay = "15.2k";
+  
+ 
 
   return (
     <footer className="footer">
@@ -212,9 +212,7 @@ const Footer = () => {
                 <strong>{loadingCounts ? "..." : writerCount}</strong> Active
                 Writers
               </span>
-              {/* <span className="stat">
-                <strong>{loadingCounts ? "..." : readerCount}</strong> Readers
-              </span> */}
+           
 
              
             </div>
