@@ -4,6 +4,8 @@ import getBlogs from "../../../service/blog/get-all-blogs";
 import { getWriters } from "../../../service/blog/get-writers";
 
 const Footer = () => {
+ 
+
   const currentYear = new Date().getFullYear();
   const [blogCount, setBlogCount] = useState(0);
   const [writerCount, setWriterCount] = useState(0);
@@ -19,8 +21,7 @@ const Footer = () => {
           getWriters(),
         ]);
 
-        // `getBlogs()` and `getWriters()` return the raw response data shape
-        // which may be an array or an object depending on the API.
+      
         const blogsArray = Array.isArray(blogsResp)
           ? blogsResp
           : blogsResp?.data || blogsResp?.blogs || [];
@@ -44,6 +45,9 @@ const Footer = () => {
       cancelled = true;
     };
   }, []);
+
+
+
 
   // readers is not available from API; keep a placeholder or compute if available
   const readersDisplay = "15.2k";
@@ -199,6 +203,7 @@ const Footer = () => {
               <p>&copy; {currentYear} BlogPlatform. All rights reserved.</p>
             </div>
             <div className="footer-stats">
+              {/* add blogcount , writercount, readercount perfectly */}
               <span className="stat">
                 <strong>{loadingCounts ? "..." : blogCount}</strong> Blogs
                 Published
@@ -207,9 +212,11 @@ const Footer = () => {
                 <strong>{loadingCounts ? "..." : writerCount}</strong> Active
                 Writers
               </span>
-              {/* <span className="stat">
-                <strong>{readersDisplay}</strong> Readers
-              </span> */}
+              <span className="stat">
+                <strong>{loadingCounts ? "..." : readerCount}</strong> Readers
+              </span>
+
+             
             </div>
           </div>
         </div>
@@ -219,3 +226,12 @@ const Footer = () => {
 };
 
 export default Footer;
+
+
+
+
+
+
+
+
+
