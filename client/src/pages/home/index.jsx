@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Header from "../../layouts/common/header";
+import Header from "../../layouts/common/header/header";
 import BlogList from "../../layouts/home/blog-list/blog-list";
 import BlogForm from "../../layouts/home/blog-form/blog-form";
 import WriterList from "../../layouts/home/writer-list/writer-list";
@@ -15,7 +15,7 @@ import { getWriters } from "../../service/blog/get-writers";
 import { createWriter } from "../../service/blog/create-writer";
 import { updateWriter } from "../../service/blog/update-writer";
 import { deleteWriter } from "../../service/blog/delete-writer";
-import Footer from "../../layouts/common/footer";
+import Footer from "../../layouts/common/footer/footer";
 import "./home.css";
 
 const Home = () => {

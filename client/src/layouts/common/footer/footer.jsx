@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./footer.css";
-import getBlogs from "../../service/blog/get-all-blogs";
-import { getWriters } from "../../service/blog/get-writers";
+import getBlogs from "../../../service/blog/get-all-blogs";
+import { getWriters } from "../../../service/blog/get-writers";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
