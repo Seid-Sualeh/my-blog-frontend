@@ -86,7 +86,7 @@ const SignUp = () => {
         },
         isActive: true,
       }).unwrap();
-
+      
       // Redirect to sign-in page with success message
       navigate('/auth/sign-in', {
         state: { 
@@ -95,9 +95,8 @@ const SignUp = () => {
         }
       });
     } catch (error) {
-      console.error('Registration error:', error);
       setErrors({
-        submit: error.data?.message || error.message || 'Registration failed. Please try again.'
+        submit: error.response?.data?.message || error.message || 'Registration failed. Please try again.'
       });
     }
   };

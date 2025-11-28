@@ -6,6 +6,8 @@ import { setCredentials } from "../../store/slices/authSlice";
 import Card from "../../components/card/card";
 import Button from "../../components/button/button";
 import LoadingSpinner from "../../components/loading-spinner/loading-spinner";
+import axios from "axios";
+import { API_CONFIG } from "../../utils/configs/api-config";
 import "./auth.css";
 
 const SignIn = () => {
@@ -16,6 +18,7 @@ const SignIn = () => {
 
   const [errors, setErrors] = useState({});
   const [loginError, setLoginError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     data: writersData,
     isLoading: writersLoading,
@@ -25,6 +28,18 @@ const SignIn = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Test direct API connection
+  useEffect(() => {
+    const testAPI = async () => {
+      try {
+        const response = await axios.get(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.WRITERS}`);
+      } catch (error) {
+        // Silent fail for test
+      }
+    };
+    testAPI();
+  }, []);
 
   // Get message from location state (from sign-up redirect)
   const { message, email: prefillEmail } = location.state || {};
@@ -72,55 +87,66 @@ const SignIn = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const authenticateUser = async () => {
+    // Try multiple approaches to get writers data
+    let writersList = [];
+    
+    try {
+      // Approach 1: Use RTK Query data if available
+      if (writersData && !writersError) {
+        writersList = Array.isArray(writersData) 
+          ? writersData 
+          : writersData?.writers || [];
+      }
+      
+      // Approach 2: If no data from RTK Query, try direct API call
+      if (writersList.length === 0) {
+        const response = await axios.get(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.WRITERS}`);
+        writersList = response.data?.data?.writers || [];
+      }
+      
+      // Approach 3: If still no data, refetch RTK Query
+      if (writersList.length === 0) {
+        await refetchWriters();
+        if (writersData) {
+          writersList = Array.isArray(writersData) 
+            ? writersData 
+            : writersData?.writers || [];
+        }
+      }
+      
+    } catch (error) {
+      throw new Error("Unable to connect to server. Please try again.");
+    }
+    
+    if (!writersList || writersList.length === 0) {
+      throw new Error("No registered users found. Please sign up first.");
+    }
+    
+    return writersList;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setLoginError("");
 
     if (!validateForm()) {
+      setIsSubmitting(false);
       return;
     }
-
-    if (writersLoading) {
-      setLoginError("Loading user data. Please try again.");
-      return;
-    }
-
-    if (writersError) {
-      setLoginError("Error loading user data. Please try again.");
-      return;
-    }
-
-    // Support both response shapes from the API:
-    // - { writers: [...] }
-    // - [...] (array of writers)
-    const writersList = Array.isArray(writersData)
-      ? writersData
-      : writersData?.writers || [];
-
-    if (!writersList || writersList.length === 0) {
-      setLoginError("No registered users found. Please sign up first.");
-      return;
-    }
-
-    const writers = writersList;
-    const normalizedEmail = formData.email.trim().toLowerCase();
-
-    // Find writer by email (simple authentication as requested)
-    const writer = writers.find(
-      (w) => w.email.toLowerCase() === normalizedEmail
-    );
-
-    if (!writer) {
-      setLoginError(
-        "No account found with this email address. Please sign up first."
-      );
-      return;
-    }
-
-    // In a real app, you'd verify the password on the backend
-    // For this simplified version, we'll just check if the writer exists
-    // You might want to add a simple password check here or use the backend for authentication
 
     try {
+      const writers = await authenticateUser();
+      const normalizedEmail = formData.email.trim().toLowerCase();
+
+      // Find writer by email
+      const writer = writers.find(w => w.email.toLowerCase() === normalizedEmail);
+
+      if (!writer) {
+        throw new Error("No account found with this email address. Please sign up first.");
+      }
+
       // Store credentials in Redux and localStorage
       dispatch(
         setCredentials({
@@ -133,7 +159,9 @@ const SignIn = () => {
       // Redirect to the user's write page or home
       navigate(`/blog/${writer._id}/write`);
     } catch (error) {
-      setLoginError("Login failed. Please try again.");
+      setLoginError(error.message || "Login failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -170,6 +198,20 @@ const SignIn = () => {
           <p>{message}</p>
         </Card>
       )}
+
+      <Card className="test-accounts-info">
+        <h3>🧪 Test Accounts</h3>
+        <p>Use these accounts to test the login:</p>
+        <ul style={{textAlign: "left", marginTop: "8px"}}>
+          <li>📧 test@example.com</li>
+          <li>📧 john.doe@example.com</li>
+          <li>📧 seid@gmail.com</li>
+          <li>📧 adem@gmail.com</li>
+        </ul>
+        <p style={{fontSize: "12px", color: "#666", marginTop: "8px"}}>
+          Password: Any password (this demo doesn't verify passwords)
+        </p>
+      </Card>
 
       <Card className="auth-card">
         <form onSubmit={handleSubmit} className="auth-form">
@@ -245,9 +287,9 @@ const SignIn = () => {
             type="submit"
             variant="primary"
             className="auth-submit"
-            disabled={writersLoading || !!writersError}
+            disabled={isSubmitting || writersLoading || !!writersError}
           >
-            {writersLoading ? "Signing In..." : "Sign In"}
+            {isSubmitting || writersLoading ? "Signing In..." : "Sign In"}
           </Button>
         </form>
 

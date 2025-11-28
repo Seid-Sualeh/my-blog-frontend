@@ -66,7 +66,7 @@ const WriteBlog = () => {
           });
         }
       } catch (error) {
-        console.error('Error loading draft:', error);
+        // Silent fail for draft loading
       }
     }
   }, [writerId, urlWriterId, blogData.title, blogData.content]);
@@ -121,7 +121,7 @@ const WriteBlog = () => {
       setSaveMessage('Draft saved automatically');
       setTimeout(() => setSaveMessage(''), 2000);
     } catch (error) {
-      console.error('Error saving draft:', error);
+      // Silent fail for draft saving
     }
   };
 

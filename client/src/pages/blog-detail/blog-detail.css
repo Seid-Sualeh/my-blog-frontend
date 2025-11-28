@@ -41,6 +41,19 @@
   line-height: 1.2;
 }
 
+.blog-detail-image-container {
+  width: 100%;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.blog-detail-image {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
+
 .blog-meta {
   display: flex;
   justify-content: space-between;

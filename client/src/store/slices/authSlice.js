@@ -11,7 +11,6 @@ const getInitialAuthState = () => {
       writer: null,
     };
   } catch (error) {
-    console.error('Error reading from localStorage:', error);
     return {
       isAuthenticated: false,
       writerId: null,
@@ -43,7 +42,7 @@ const authSlice = createSlice({
           writer,
         }));
       } catch (error) {
-        console.error('Error saving to localStorage:', error);
+        // Silent fail for localStorage
       }
     },
     logout: (state) => {
@@ -56,7 +55,7 @@ const authSlice = createSlice({
       try {
         localStorage.removeItem('writerAuth');
       } catch (error) {
-        console.error('Error removing from localStorage:', error);
+        // Silent fail for localStorage
       }
     },
     updateWriter: (state, action) => {
@@ -71,7 +70,7 @@ const authSlice = createSlice({
           localStorage.setItem('writerAuth', JSON.stringify(authData));
         }
       } catch (error) {
-        console.error('Error updating localStorage:', error);
+        // Silent fail for localStorage
       }
     },
   },
