@@ -45,6 +45,19 @@ export const blogApi = createApi({
         url: `${API_CONFIG.ENDPOINTS.BLOGS}/${id}`,
         method: "GET",
       }),
+      // Normalize different possible backend shapes so frontend consumers
+      // always receive a consistent blog object
+      transformResponse: (response) => {
+        const extractBlog = (resp) => {
+          if (!resp) return null;
+          if (resp.blog && (resp.blog._id || resp.blog.id)) return resp.blog;
+          if (resp.data && (resp.data._id || resp.data.id)) return resp.data;
+          if (resp._id || resp.id) return resp;
+          return null;
+        };
+
+        return { blog: extractBlog(response) };
+      },
       providesTags: (result, error, id) => [{ type: "Blog", id }],
     }),
 
