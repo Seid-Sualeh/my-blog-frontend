@@ -7,6 +7,7 @@ import {
   useUpdateBlogMutation,
 } from "../../store/api/blogApi";
 import { selectWriterId, selectCurrentWriter } from '../../store/slices/authSlice';
+import MarkdownEditor from '../../components/markdown-editor/markdown-editor';
 import Card from '../../components/card/card';
 import Button from '../../components/button/button';
 import LoadingSpinner from '../../components/loading-spinner/loading-spinner';
@@ -140,8 +141,8 @@ const WriteBlog = () => {
 
     if (!blogData.content.trim()) {
       newErrors.content = 'Content is required';
-    } else if (blogData.content.trim().length < 50) {
-      newErrors.content = 'Content must be at least 50 characters long';
+    } else if (blogData.content.trim().length < 100) {
+      newErrors.content = 'Content must be at least 100 characters long for a meaningful blog post';
     }
 
     setErrors(newErrors);
@@ -257,20 +258,28 @@ const WriteBlog = () => {
 
           <div className="form-group">
             <label htmlFor="content">Content *</label>
-            <textarea
-              id="content"
-              name="content"
+            <MarkdownEditor
               value={blogData.content}
-              onChange={handleInputChange}
+              onChange={(value) => {
+                const fakeEvent = {
+                  target: {
+                    name: 'content',
+                    value: value
+                  }
+                };
+                handleInputChange(fakeEvent);
+              }}
               placeholder="Start writing your blog post here...
 
 Tips for great content:
-• Use clear headings to organize your thoughts
+• Use clear headings to organize your thoughts (# Heading 1, ## Heading 2, etc.)
 • Write in a conversational tone
 • Include examples and practical tips
-• Proofread before publishing"
+• Use **bold text** and *italic text* for emphasis
+• Create lists with - or 1. for better readability
+• Add links with [text](url) and images with ![alt](image-url)"
               className={errors.content ? 'error' : ''}
-              rows={20}
+              height="500px"
             />
             <div className="input-help">
               <span>{blogData.content.length} characters</span>

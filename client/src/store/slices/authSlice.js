@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { removePasswordHash } from '../../utils/helpers/index';
 
 // Helper function to get initial auth state from localStorage
 const getInitialAuthState = () => {
@@ -46,6 +47,7 @@ const authSlice = createSlice({
       }
     },
     logout: (state) => {
+      const userEmail = state.email;
       state.isAuthenticated = false;
       state.writerId = null;
       state.email = null;
@@ -54,6 +56,10 @@ const authSlice = createSlice({
       // Remove from localStorage
       try {
         localStorage.removeItem('writerAuth');
+        // Also remove password hash
+        if (userEmail) {
+          removePasswordHash(userEmail);
+        }
       } catch (error) {
         // Silent fail for localStorage
       }

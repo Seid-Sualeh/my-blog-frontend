@@ -1,19 +1,47 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectIsAuthenticated } from '../../store/slices/authSlice';
+import { selectIsAuthenticated, selectWriterId } from '../../store/slices/authSlice';
 import Card from '../../components/card/card';
 import Button from '../../components/button/button';
 import './become-writer.css';
 
 const BecomeWriter = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
+  const writerId = useSelector(selectWriterId);
 
   return (
     <div className="become-writer-container">
+      {/* Banner Section */}
+      <div className="become-writer-banner">
+        <div className="banner-image">
+          <img src="/images/tech-blog-1.jpg" alt="Writer Community Banner" />
+          <div className="banner-overlay">
+            <div className="banner-content">
+              <h1>🌟 Join Our Writing Community</h1>
+              <p>Where every story finds its audience and every voice matters</p>
+              <div className="banner-stats">
+                <div className="stat">
+                  <span className="stat-number">1,000+</span>
+                  <span className="stat-label">Active Writers</span>
+                </div>
+                <div className="stat">
+                  <span className="stat-number">10,000+</span>
+                  <span className="stat-label">Published Articles</span>
+                </div>
+                <div className="stat">
+                  <span className="stat-number">50,000+</span>
+                  <span className="stat-label">Monthly Readers</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="become-writer-hero">
-        <h1>Become a Writer</h1>
-        <p>Share your thoughts, stories, and expertise with our community</p>
+        <h2>Transform Your Ideas Into Stories</h2>
+        <p>Join thousands of writers who are already making their mark in the digital world</p>
       </div>
 
       <div className="become-writer-content">
@@ -67,11 +95,11 @@ const BecomeWriter = () => {
           <h2>Ready to Start Writing?</h2>
           <p>Join thousands of writers who are already sharing their stories on our platform.</p>
           
-          {isAuthenticated ? (
+          {isAuthenticated && writerId ? (
             <div className="authenticated-actions">
               <p>You're already signed in! Start writing your first blog post.</p>
-              <Link to="/blog">
-                <Button>Start Writing</Button>
+              <Link to={`/blog/${writerId}/write`}>
+                <Button variant="primary" size="large">✍️ Start Writing</Button>
               </Link>
             </div>
           ) : (

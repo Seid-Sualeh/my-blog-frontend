@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useGetAllWritersQuery } from "../../store/api/blogApi";
 import { setCredentials } from "../../store/slices/authSlice";
+import { verifyPassword, getPasswordHash } from "../../utils/helpers/index";
 import Card from "../../components/card/card";
 import Button from "../../components/button/button";
 import LoadingSpinner from "../../components/loading-spinner/loading-spinner";
@@ -147,6 +148,17 @@ const SignIn = () => {
         throw new Error("No account found with this email address. Please sign up first.");
       }
 
+      // Validate password
+      const storedPasswordHash = getPasswordHash(writer.email);
+      if (!storedPasswordHash) {
+        throw new Error("No password found for this account. Please sign up again.");
+      }
+
+      const isPasswordValid = await verifyPassword(formData.password, storedPasswordHash);
+      if (!isPasswordValid) {
+        throw new Error("Invalid password. Please check your password and try again.");
+      }
+
       // Store credentials in Redux and localStorage
       dispatch(
         setCredentials({
@@ -156,8 +168,8 @@ const SignIn = () => {
         })
       );
 
-      // Redirect to the user's write page or home
-      navigate(`/blog/${writer._id}/write`);
+      // Redirect to home page after successful login
+      navigate('/');
     } catch (error) {
       setLoginError(error.message || "Login failed. Please try again.");
     } finally {

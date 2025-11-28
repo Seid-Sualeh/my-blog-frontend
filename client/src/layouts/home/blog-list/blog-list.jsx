@@ -67,13 +67,16 @@ const BlogList = ({
           )}
 
           <div className="blog-actions">
-            <Button
-              variant="primary"
-              size="small"
-              onClick={() => onViewBlog(blog)}
+            <a 
+              href={`/blog/${blog._id}`} 
+              className="learn-more-link"
+              onClick={(e) => {
+                e.preventDefault();
+                onViewBlog(blog);
+              }}
             >
-              Read More
-            </Button>
+              Learn More →
+            </a>
             <div className="blog-action-buttons">
               <Button
                 variant="secondary"

@@ -3,6 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useGetBlogByIdQuery, useDeleteBlogMutation } from '../../store/api/blogApi';
 import { selectIsAuthenticated, selectWriterId } from '../../store/slices/authSlice';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import LoadingSpinner from '../../components/loading-spinner/loading-spinner';
 import Card from '../../components/card/card';
 import Button from '../../components/button/button';
@@ -182,11 +184,9 @@ const BlogDetail = () => {
 
           <div className="blog-content">
             {blog.content ? (
-              blog.content.split('\n').map((paragraph, index) => (
-                paragraph.trim() && (
-                  <p key={index}>{paragraph}</p>
-                )
-              ))
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {blog.content}
+              </ReactMarkdown>
             ) : (
               <p>No content available for this blog post.</p>
             )}

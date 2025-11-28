@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useCreateWriterMutation } from '../../store/api/blogApi';
 import { setCredentials } from '../../store/slices/authSlice';
+import { hashPassword, storePasswordHash, validatePasswordStrength } from '../../utils/helpers/index';
 import Card from '../../components/card/card';
 import Button from '../../components/button/button';
 import LoadingSpinner from '../../components/loading-spinner/loading-spinner';
@@ -50,10 +51,10 @@ const SignUp = () => {
       newErrors.email = 'Email is invalid';
     }
 
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    // Validate password strength
+    const passwordValidation = validatePasswordStrength(formData.password);
+    if (!passwordValidation.isValid) {
+      newErrors.password = passwordValidation.message;
     }
 
     if (!formData.confirmPassword) {
@@ -86,6 +87,10 @@ const SignUp = () => {
         },
         isActive: true,
       }).unwrap();
+      
+      // Hash and store the password
+      const passwordHash = await hashPassword(formData.password);
+      storePasswordHash(formData.email.trim().toLowerCase(), passwordHash);
       
       // Redirect to sign-in page with success message
       navigate('/auth/sign-in', {

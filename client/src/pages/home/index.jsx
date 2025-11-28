@@ -1,8 +1,14 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { useGetAllBlogsQuery, useDeleteBlogMutation } from "../../store/api/blogApi";
-import { selectIsAuthenticated, selectWriterId } from "../../store/slices/authSlice";
+import {
+  useGetAllBlogsQuery,
+  useDeleteBlogMutation,
+} from "../../store/api/blogApi";
+import {
+  selectIsAuthenticated,
+  selectWriterId,
+} from "../../store/slices/authSlice";
 import LoadingSpinner from "../../components/loading-spinner/loading-spinner";
 import Card from "../../components/card/card";
 import Button from "../../components/button/button";
@@ -17,12 +23,12 @@ const Home = () => {
   const [directBlogs, setDirectBlogs] = React.useState([]);
   const [directLoading, setDirectLoading] = React.useState(false);
   const [directError, setDirectError] = React.useState(null);
-  
+
   // Filter states
   const [category, setCategory] = useState("all");
   const [articleType, setArticleType] = useState("all");
   const [search, setSearch] = useState("");
-  
+
   // Authentication state
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const writerId = useSelector(selectWriterId);
@@ -31,73 +37,122 @@ const Home = () => {
   // Helper function to get appropriate image for blog
   const getBlogImage = (blog) => {
     if (blog.image) return blog.image;
-    
+
     // Use blog ID to ensure consistent but unique images for each blog
-    const blogId = blog._id || '';
-    const hashCode = blogId.split('').reduce((a, b) => {
-      a = ((a << 5) - a) + b.charCodeAt(0);
+    const blogId = blog._id || "";
+    const hashCode = blogId.split("").reduce((a, b) => {
+      a = (a << 5) - a + b.charCodeAt(0);
       return a & a;
     }, 0);
-    
+
     // Available images by category
-    const techImages = ['/images/tech-blog-1.jpg', '/images/tech-blog-2.jpg'];
-    const travelImages = ['/images/travel-blog-1.jpg', '/images/travel-blog-2.jpg'];
-    const foodImages = ['/images/food-blog-1.jpg'];
-    const natureImages = ['/images/nature-blog-1.jpg'];
-    const businessImages = ['/images/business-blog-1.jpg'];
-    const lifestyleImages = ['/images/lifestyle-blog-1.jpg'];
-    const healthImages = ['/images/health-blog-1.jpg'];
-    
+    const techImages = ["/images/tech-blog-1.jpg", "/images/tech-blog-2.jpg"];
+    const travelImages = [
+      "/images/travel-blog-1.jpg",
+      "/images/travel-blog-2.jpg",
+    ];
+    const foodImages = ["/images/food-blog-1.jpg"];
+    const natureImages = ["/images/nature-blog-1.jpg"];
+    const businessImages = ["/images/business-blog-1.jpg"];
+    const lifestyleImages = ["/images/lifestyle-blog-1.jpg"];
+    const healthImages = ["/images/health-blog-1.jpg"];
+
     // Default fallback images
-    const defaultImages = [...techImages, ...travelImages, ...foodImages, ...natureImages, ...businessImages, ...lifestyleImages, ...healthImages];
-    
+    const defaultImages = [
+      ...techImages,
+      ...travelImages,
+      ...foodImages,
+      ...natureImages,
+      ...businessImages,
+      ...lifestyleImages,
+      ...healthImages,
+    ];
+
     const tags = blog.tags || [];
     const title = blog.title.toLowerCase();
-    
+
     // Select image based on content/tags with uniqueness
-    if (tags.includes('technology') || tags.includes('tech') || title.includes('programming') || title.includes('code') || title.includes('developer')) {
+    if (
+      tags.includes("technology") ||
+      tags.includes("tech") ||
+      title.includes("programming") ||
+      title.includes("code") ||
+      title.includes("developer")
+    ) {
       const index = Math.abs(hashCode) % techImages.length;
       return techImages[index];
-    } else if (tags.includes('travel') || title.includes('travel') || title.includes('adventure') || title.includes('journey')) {
+    } else if (
+      tags.includes("travel") ||
+      title.includes("travel") ||
+      title.includes("adventure") ||
+      title.includes("journey")
+    ) {
       const index = Math.abs(hashCode) % travelImages.length;
       return travelImages[index];
-    } else if (tags.includes('food') || title.includes('recipe') || title.includes('cooking') || title.includes('culinary')) {
+    } else if (
+      tags.includes("food") ||
+      title.includes("recipe") ||
+      title.includes("cooking") ||
+      title.includes("culinary")
+    ) {
       const index = Math.abs(hashCode) % foodImages.length;
       return foodImages[index];
-    } else if (tags.includes('nature') || title.includes('nature') || title.includes('outdoor') || title.includes('environment')) {
+    } else if (
+      tags.includes("nature") ||
+      title.includes("nature") ||
+      title.includes("outdoor") ||
+      title.includes("environment")
+    ) {
       const index = Math.abs(hashCode) % natureImages.length;
       return natureImages[index];
-    } else if (tags.includes('business') || title.includes('business') || title.includes('entrepreneur') || title.includes('startup')) {
+    } else if (
+      tags.includes("business") ||
+      title.includes("business") ||
+      title.includes("entrepreneur") ||
+      title.includes("startup")
+    ) {
       const index = Math.abs(hashCode) % businessImages.length;
       return businessImages[index];
-    } else if (tags.includes('lifestyle') || title.includes('lifestyle') || title.includes('life') || title.includes('personal')) {
+    } else if (
+      tags.includes("lifestyle") ||
+      title.includes("lifestyle") ||
+      title.includes("life") ||
+      title.includes("personal")
+    ) {
       const index = Math.abs(hashCode) % lifestyleImages.length;
       return lifestyleImages[index];
-    } else if (tags.includes('health') || title.includes('health') || title.includes('fitness') || title.includes('wellness')) {
+    } else if (
+      tags.includes("health") ||
+      title.includes("health") ||
+      title.includes("fitness") ||
+      title.includes("wellness")
+    ) {
       const index = Math.abs(hashCode) % healthImages.length;
       return healthImages[index];
     }
-    
+
     // Default fallback - ensure uniqueness across blogs
     const index = Math.abs(hashCode) % defaultImages.length;
     return defaultImages[index];
   };
-  
+
   // Direct API connection as fallback
   const fetchBlogsDirectly = async () => {
     setDirectLoading(true);
     setDirectError(null);
     try {
-      const response = await axios.get(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.BLOGS}`);
+      const response = await axios.get(
+        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.BLOGS}`
+      );
       const blogs = response.data?.data?.blogs || [];
       setDirectBlogs(blogs);
     } catch (apiError) {
-      setDirectError(apiError.message || 'Failed to fetch blogs');
+      setDirectError(apiError.message || "Failed to fetch blogs");
     } finally {
       setDirectLoading(false);
     }
   };
-  
+
   // Auto-fetch on component mount
   useEffect(() => {
     fetchBlogsDirectly();
@@ -105,15 +160,15 @@ const Home = () => {
 
   // RTK Query data
   const blogs = blogsData?.blogs || [];
-  
+
   // Use direct data if RTK Query fails
   const displayBlogs = directBlogs.length > 0 ? directBlogs : blogs;
 
   // Extract unique categories from blog tags
   const availableCategories = useMemo(() => {
     const allTags = displayBlogs
-      .filter(blog => blog.isPublished && blog.tags)
-      .flatMap(blog => blog.tags);
+      .filter((blog) => blog.isPublished && blog.tags)
+      .flatMap((blog) => blog.tags);
     const uniqueTags = [...new Set(allTags)].sort();
     return ["all", ...uniqueTags];
   }, [displayBlogs]);
@@ -134,22 +189,24 @@ const Home = () => {
           (blog.writer &&
             blog.writer.name &&
             blog.writer.name.toLowerCase().includes(searchLower)) ||
-          (blog.tags && blog.tags.some(tag => tag.toLowerCase().includes(searchLower)))
+          (blog.tags &&
+            blog.tags.some((tag) => tag.toLowerCase().includes(searchLower)))
       );
     }
 
     // Apply category filter
     if (category !== "all") {
       result = result.filter(
-        (blog) =>
-          blog.tags && blog.tags.includes(category)
+        (blog) => blog.tags && blog.tags.includes(category)
       );
     }
 
     // Apply article type filter
     if (articleType === "popular") {
       // Sort by readTime (estimated by content length) for popular articles
-      result.sort((a, b) => (b.content?.length || 0) - (a.content?.length || 0));
+      result.sort(
+        (a, b) => (b.content?.length || 0) - (a.content?.length || 0)
+      );
     } else if (articleType === "recent") {
       // Sort by createdAt descending for recent articles
       result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -159,7 +216,11 @@ const Home = () => {
   }, [displayBlogs, category, articleType, search]);
 
   const handleDeleteBlog = async (blogId, blogTitle) => {
-    if (!window.confirm(`Are you sure you want to delete "${blogTitle}"? This action cannot be undone.`)) {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete "${blogTitle}"? This action cannot be undone.`
+      )
+    ) {
       return;
     }
 
@@ -169,17 +230,19 @@ const Home = () => {
       refetch();
       fetchBlogsDirectly();
     } catch (error) {
-      alert('Failed to delete blog post: ' + (error.message || 'Unknown error'));
+      alert(
+        "Failed to delete blog post: " + (error.message || "Unknown error")
+      );
     }
   };
 
   const handleEditBlog = (blogId) => {
     navigate(`/blog/${writerId}/write?edit=${blogId}`);
   };
-  
+
   const isDisplayLoading = isLoading || directLoading;
   const displayError = error || directError;
-  
+
   if (isLoading) {
     return <LoadingSpinner text="Loading blog posts..." />;
   }
@@ -189,11 +252,28 @@ const Home = () => {
       <div className="home-container">
         <Card className="error-card">
           <h2>Error Loading Blogs</h2>
-          <p>{displayError.message || displayError || "Failed to load blog posts"}</p>
-          <p><strong>API URL:</strong> {`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.BLOGS}`}</p>
-          <div style={{marginTop: '12px'}}>
-            <Button onClick={() => window.location.reload()}>Reload Page</Button>
-            <Button variant="outline" onClick={() => {refetch(); fetchBlogsDirectly();}}>Retry Both Methods</Button>
+          <p>
+            {displayError.message ||
+              displayError ||
+              "Failed to load blog posts"}
+          </p>
+          <p>
+            <strong>API URL:</strong>{" "}
+            {`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.BLOGS}`}
+          </p>
+          <div style={{ marginTop: "12px" }}>
+            <Button onClick={() => window.location.reload()}>
+              Reload Page
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                refetch();
+                fetchBlogsDirectly();
+              }}
+            >
+              Retry Both Methods
+            </Button>
           </div>
         </Card>
       </div>
@@ -208,7 +288,11 @@ const Home = () => {
     <div className="home-container">
       <div className="home-hero">
         <div className="hero-banner">
-          <img src="/images/tech-blog-1.jpg" alt="Blog Platform Banner" className="banner-image" />
+          <img
+            src="/images/tech-blog-1.jpg"
+            alt="Blog Platform Banner"
+            className="banner-image"
+          />
           <div className="hero-content">
             <h1>Welcome to Our Blog Platform</h1>
             <p>Discover amazing stories from our talented writers</p>
@@ -218,29 +302,32 @@ const Home = () => {
 
       <div className="blog-section">
         <h2>Latest Blog Posts</h2>
-        
+
         {/* Filter Toolbar */}
-        <div className="filter-toolbar" style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "16px",
-          marginBottom: "24px",
-          padding: "20px",
-          backgroundColor: "#f8f9fa",
-          borderRadius: "8px",
-          border: "1px solid #e9ecef"
-        }}>
+        <div
+          className="filter-toolbar"
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "16px",
+            marginBottom: "24px",
+            padding: "20px",
+            backgroundColor: "#f8f9fa",
+            borderRadius: "8px",
+            border: "1px solid #e9ecef",
+          }}
+        >
           <div style={{ flex: 1, minWidth: "220px" }}>
             <label
               htmlFor="search-articles"
-              style={{ 
-                display: "block", 
-                fontWeight: "500", 
+              style={{
+                display: "block",
+                fontWeight: "500",
                 marginBottom: "4px",
                 fontSize: "14px",
-                color: "#495057"
+                color: "#495057",
               }}
             >
               Search Articles
@@ -258,21 +345,21 @@ const Home = () => {
                 border: "1px solid #ced4da",
                 fontSize: "15px",
                 outline: "none",
-                transition: "border-color 0.15s ease-in-out"
+                transition: "border-color 0.15s ease-in-out",
               }}
-              onFocus={(e) => e.target.style.borderColor = "#80bdff"}
-              onBlur={(e) => e.target.style.borderColor = "#ced4da"}
+              onFocus={(e) => (e.target.style.borderColor = "#80bdff")}
+              onBlur={(e) => (e.target.style.borderColor = "#ced4da")}
             />
           </div>
           <div style={{ minWidth: "180px" }}>
             <label
               htmlFor="filter-article-type"
-              style={{ 
-                display: "block", 
-                fontWeight: "500", 
+              style={{
+                display: "block",
+                fontWeight: "500",
                 marginBottom: "4px",
                 fontSize: "14px",
-                color: "#495057"
+                color: "#495057",
               }}
             >
               Articles
@@ -289,7 +376,7 @@ const Home = () => {
                 fontSize: "15px",
                 outline: "none",
                 backgroundColor: "white",
-                cursor: "pointer"
+                cursor: "pointer",
               }}
             >
               <option value="all">All Blogs</option>
@@ -300,12 +387,12 @@ const Home = () => {
           <div style={{ minWidth: "180px" }}>
             <label
               htmlFor="filter-category"
-              style={{ 
-                display: "block", 
-                fontWeight: "500", 
+              style={{
+                display: "block",
+                fontWeight: "500",
                 marginBottom: "4px",
                 fontSize: "14px",
-                color: "#495057"
+                color: "#495057",
               }}
             >
               Category
@@ -322,12 +409,14 @@ const Home = () => {
                 fontSize: "15px",
                 outline: "none",
                 backgroundColor: "white",
-                cursor: "pointer"
+                cursor: "pointer",
               }}
             >
               {availableCategories.map((cat) => (
                 <option key={cat} value={cat}>
-                  {cat === "all" ? "All Categories" : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  {cat === "all"
+                    ? "All Categories"
+                    : cat.charAt(0).toUpperCase() + cat.slice(1)}
                 </option>
               ))}
             </select>
@@ -335,63 +424,74 @@ const Home = () => {
         </div>
 
         {/* Results Header */}
-        <div style={{
-          marginBottom: "20px",
-          padding: "0 4px"
-        }}>
-          <h3 style={{
-            margin: "0",
-            fontSize: "18px",
-            color: "#495057",
-            fontWeight: "500"
-          }}>
+        <div
+          style={{
+            marginBottom: "20px",
+            padding: "0 4px",
+          }}
+        >
+          <h3
+            style={{
+              margin: "0",
+              fontSize: "18px",
+              color: "#495057",
+              fontWeight: "500",
+            }}
+          >
             {category === "all"
               ? `Showing ${filteredBlogs.length} articles`
-              : `${category.charAt(0).toUpperCase() + category.slice(1)} Articles (${filteredBlogs.length})`}
-            {articleType !== "all" && 
+              : `${
+                  category.charAt(0).toUpperCase() + category.slice(1)
+                } Articles (${filteredBlogs.length})`}
+            {articleType !== "all" &&
               ` - ${
                 articleType.charAt(0).toUpperCase() + articleType.slice(1)
-              }`
-            }
+              }`}
           </h3>
         </div>
 
         {filteredBlogs.length === 0 ? (
           <Card className="empty-state">
             <h3>
-              {search || category !== "all" || articleType !== "all" 
-                ? "No articles found" 
-                : "No blog posts available yet"
-              }
+              {search || category !== "all" || articleType !== "all"
+                ? "No articles found"
+                : "No blog posts available yet"}
             </h3>
             <p>
               {search || category !== "all" || articleType !== "all"
                 ? "Try adjusting your search criteria or filters."
-                : "Be the first to share your thoughts with our community!"
-              }
+                : "Be the first to share your thoughts with our community!"}
             </p>
-            <div style={{marginTop: '12px'}}>
+            <div style={{ marginTop: "12px" }}>
               {search || category !== "all" || articleType !== "all" ? (
                 <>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={() => {
                       setSearch("");
                       setCategory("all");
                       setArticleType("all");
                     }}
-                    style={{marginRight: '8px'}}
+                    style={{ marginRight: "8px" }}
                   >
                     Clear Filters
                   </Button>
-                  <Button variant="outline" onClick={fetchBlogsDirectly}>Refresh Blogs</Button>
+                  <Button variant="outline" onClick={fetchBlogsDirectly}>
+                    Refresh Blogs
+                  </Button>
                 </>
               ) : (
                 <>
                   <Link to="/become-a-writer">
                     <Button>Become a Writer</Button>
                   </Link>
-                  <Button variant="outline" onClick={fetchBlogsDirectly} style={{marginLeft: '8px'}}>Refresh Blogs</Button>
+                  <Button
+                    variant="outline"
+                    onClick={fetchBlogsDirectly}
+                    style={{ marginLeft: "8px" }}
+                  >
+                    Refresh Blogs
+                  </Button>
                 </>
               )}
             </div>
@@ -400,13 +500,13 @@ const Home = () => {
           <div className="blog-grid">
             {filteredBlogs.map((blog) => {
               const isAuthor = isAuthenticated && blog.writer?._id === writerId;
-              
+
               return (
                 <Card key={blog._id} className="blog-card">
                   <div className="blog-image-container">
-                    <img 
-                      src={blog.image || getBlogImage(blog)} 
-                      alt={blog.title} 
+                    <img
+                      src={blog.image || getBlogImage(blog)}
+                      alt={blog.title}
                       className="blog-image"
                     />
                   </div>
@@ -438,22 +538,25 @@ const Home = () => {
                   </div>
 
                   <div className="blog-card-footer">
-                    <Link to={`/blog/${blog._id}`}>
-                      <Button variant="outline">Read More</Button>
+                    <Link to={`/blog/${blog._id}`} className="learn-more-link">
+                      Learn More →
                     </Link>
                     {isAuthor && (
-                      <div className="blog-actions" style={{marginLeft: '8px'}}>
-                        <Button 
-                          size="small" 
-                          variant="outline" 
+                      <div
+                        className="blog-actions"
+                        style={{ marginLeft: "8px" }}
+                      >
+                        <Button
+                          size="small"
+                          variant="outline"
                           onClick={() => handleEditBlog(blog._id)}
-                          style={{marginRight: '8px'}}
+                          style={{ marginRight: "8px" }}
                         >
                           Edit
                         </Button>
-                        <Button 
-                          size="small" 
-                          variant="danger" 
+                        <Button
+                          size="small"
+                          variant="danger"
                           onClick={() => handleDeleteBlog(blog._id, blog.title)}
                           disabled={isDeleting}
                         >
