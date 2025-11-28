@@ -345,8 +345,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Built with ❤️ by the Modern Blog Platform Team**
+**Built with ❤️ by Seid Sualeh**
 
-[🌟 Star this repo](https://github.com/your-username/my-blog-frontend) if you found it helpful!
+[🌟 Star this repo](https://github.com/Seid-Sualeh/my-blog-frontend) if you found it helpful!
 
 </div>
