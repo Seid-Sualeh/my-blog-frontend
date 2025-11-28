@@ -181,11 +181,15 @@ const BlogDetail = () => {
           )}
 
           <div className="blog-content">
-            {blog.content.split('\n').map((paragraph, index) => (
-              paragraph.trim() && (
-                <p key={index}>{paragraph}</p>
-              )
-            ))}
+            {blog.content ? (
+              blog.content.split('\n').map((paragraph, index) => (
+                paragraph.trim() && (
+                  <p key={index}>{paragraph}</p>
+                )
+              ))
+            ) : (
+              <p>No content available for this blog post.</p>
+            )}
           </div>
 
           {isAuthor && (

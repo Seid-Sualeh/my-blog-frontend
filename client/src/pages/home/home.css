@@ -1,13 +1,13 @@
 .home-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
+  max-width: 1400px;
+
 }
 
 .home-hero {
-  margin-bottom: 3rem;
-  border-radius: 12px;
+  /* margin: 0 -1rem 3rem -1rem; */
+  border-radius: 0;
   overflow: hidden;
+  width: 100%;
 }
 
 .hero-banner {
@@ -16,6 +16,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100vw;
+  /* margin-left: calc(-50vw + 50%); */
 }
 
 .banner-image {
@@ -36,6 +38,8 @@
   padding: 2rem;
   border-radius: 12px;
   backdrop-filter: blur(5px);
+  max-width: 90%;
+  margin: 0 auto;
 }
 
 .hero-content h1 {
@@ -121,11 +125,37 @@
 }
 
 .author {
-  font-weight: 500;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  font-size: 0.95rem;
+  position: relative;
+}
+
+.author::before {
+  content: "✍️ ";
+  margin-right: 6px;
+  font-size: 1rem;
 }
 
 .date {
-  color: #999;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  font-weight: 500;
+  font-size: 0.85rem;
+  position: relative;
+}
+
+.date::before {
+  content: "📅 ";
+  margin-right: 4px;
+  font-size: 0.9rem;
 }
 
 .blog-tags {
@@ -136,12 +166,39 @@
 }
 
 .tag {
-  background-color: #e3f2fd;
-  color: #1976d2;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  color: #2d3748;
+  padding: 0.4rem 0.9rem;
+  border-radius: 25px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.tag::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.5s;
+}
+
+.tag:hover::before {
+  left: 100%;
+}
+
+.tag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+  color: white;
 }
 
 .blog-excerpt {

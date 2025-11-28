@@ -199,19 +199,7 @@ const SignIn = () => {
         </Card>
       )}
 
-      <Card className="test-accounts-info">
-        <h3>🧪 Test Accounts</h3>
-        <p>Use these accounts to test the login:</p>
-        <ul style={{textAlign: "left", marginTop: "8px"}}>
-          <li>📧 test@example.com</li>
-          <li>📧 john.doe@example.com</li>
-          <li>📧 seid@gmail.com</li>
-          <li>📧 adem@gmail.com</li>
-        </ul>
-        <p style={{fontSize: "12px", color: "#666", marginTop: "8px"}}>
-          Password: Any password (this demo doesn't verify passwords)
-        </p>
-      </Card>
+     
 
       <Card className="auth-card">
         <form onSubmit={handleSubmit} className="auth-form">
