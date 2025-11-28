@@ -151,18 +151,6 @@ export const blogApi = createApi({
       }),
       invalidatesTags: (result, error, id) => [{ type: "Writer", id }],
     }),
-
-    // Authentication endpoints
-    loginWriter: builder.mutation({
-      query: (credentials) => ({
-        url: `${API_CONFIG.ENDPOINTS.WRITERS}/login`,
-        method: "POST",
-        body: credentials,
-      }),
-      transformResponse: (response) => {
-        return response;
-      },
-    }),
   }),
 });
 
@@ -178,5 +166,4 @@ export const {
   useCreateWriterMutation,
   useUpdateWriterMutation,
   useDeleteWriterMutation,
-  useLoginWriterMutation,
 } = blogApi;

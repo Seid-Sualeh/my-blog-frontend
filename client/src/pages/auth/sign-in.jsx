@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { useGetAllWritersQuery, useLoginWriterMutation } from "../../store/api/blogApi";
+import { useGetAllWritersQuery } from "../../store/api/blogApi";
 import { setCredentials } from "../../store/slices/authSlice";
+import { verifyPassword, getPasswordHash } from "../../utils/helpers/index";
 import Card from "../../components/card/card";
 import Button from "../../components/button/button";
 import LoadingSpinner from "../../components/loading-spinner/loading-spinner";
@@ -25,7 +26,7 @@ const SignIn = () => {
     error: writersError,
     refetch: refetchWriters,
   } = useGetAllWritersQuery();
-  const [loginWriter, { isLoading: loginLoading }] = useLoginWriterMutation();
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -88,37 +89,43 @@ const SignIn = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const authenticateUser = async (email, password) => {
+  const authenticateUser = async () => {
+    // Try multiple approaches to get writers data
+    let writersList = [];
+    
     try {
-      // Use the new login endpoint
-      const response = await loginWriter({
-        email: email.trim().toLowerCase(),
-        password: password
-      }).unwrap();
+      // Approach 1: Use RTK Query data if available
+      if (writersData && !writersError) {
+        writersList = Array.isArray(writersData) 
+          ? writersData 
+          : writersData?.writers || [];
+      }
       
-      // Check if the response contains user data
-      if (response && response.writer) {
-        return response.writer;
-      } else if (response && response.data && response.data.writer) {
-        return response.data.writer;
-      } else {
-        throw new Error("Invalid response from server");
+      // Approach 2: If no data from RTK Query, try direct API call
+      if (writersList.length === 0) {
+        const response = await axios.get(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.WRITERS}`);
+        writersList = response.data?.data?.writers || [];
+      }
+      
+      // Approach 3: If still no data, refetch RTK Query
+      if (writersList.length === 0) {
+        await refetchWriters();
+        if (writersData) {
+          writersList = Array.isArray(writersData) 
+            ? writersData 
+            : writersData?.writers || [];
+        }
       }
       
     } catch (error) {
-      // Handle different error types
-      if (error.status === 404) {
-        throw new Error("No account found with this email address. Please sign up first.");
-      } else if (error.status === 401) {
-        throw new Error("Invalid password. Please check your password and try again.");
-      } else if (error.status === 400) {
-        throw new Error("Invalid email or password format.");
-      } else if (error.message) {
-        throw new Error(error.message);
-      } else {
-        throw new Error("Login failed. Please check your credentials and try again.");
-      }
+      throw new Error("Unable to connect to server. Please try again.");
     }
+    
+    if (!writersList || writersList.length === 0) {
+      throw new Error("No registered users found. Please sign up first.");
+    }
+    
+    return writersList;
   };
 
   const handleSubmit = async (e) => {
@@ -132,8 +139,38 @@ const SignIn = () => {
     }
 
     try {
-      // Use the new backend authentication
-      const writer = await authenticateUser(formData.email, formData.password);
+      const writers = await authenticateUser();
+      const normalizedEmail = formData.email.trim().toLowerCase();
+
+      // Find writer by email
+      const writer = writers.find(w => w.email.toLowerCase() === normalizedEmail);
+
+      if (!writer) {
+        throw new Error("No account found with this email address. Please sign up first.");
+      }
+
+      // Get stored password hash from localStorage
+      const storedPasswordHash = getPasswordHash(writer.email);
+      
+      if (!storedPasswordHash) {
+        // If no password hash in localStorage, try to create one from the provided password
+        // This handles the case where user signed up but hash wasn't stored properly
+        const { hashPassword, storePasswordHash } = await import('../../utils/helpers/index');
+        const newPasswordHash = await hashPassword(formData.password);
+        storePasswordHash(writer.email, newPasswordHash);
+        
+        // Now verify the password
+        const isPasswordValid = await verifyPassword(formData.password, newPasswordHash);
+        if (!isPasswordValid) {
+          throw new Error("Invalid password. Please check your password and try again.");
+        }
+      } else {
+        // Verify password against stored hash
+        const isPasswordValid = await verifyPassword(formData.password, storedPasswordHash);
+        if (!isPasswordValid) {
+          throw new Error("Invalid password. Please check your password and try again.");
+        }
+      }
 
       // Store credentials in Redux
       dispatch(
@@ -263,9 +300,9 @@ const SignIn = () => {
             type="submit"
             variant="primary"
             className="auth-submit"
-            disabled={isSubmitting || writersLoading || loginLoading || !!writersError}
+            disabled={isSubmitting || writersLoading || !!writersError}
           >
-            {isSubmitting || writersLoading || loginLoading ? "Signing In..." : "Sign In"}
+            {isSubmitting || writersLoading ? "Signing In..." : "Sign In"}
           </Button>
         </form>
 
