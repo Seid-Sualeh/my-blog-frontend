@@ -4,8 +4,8 @@ export const API_CONFIG = {
   
 
   
-  // BASE_URL: 'https://seid-blog-website.onrender.com/api',
-BASE_URL: 'http://localhost:5000/api',
+  BASE_URL: 'https://seid-blog-website.onrender.com/api',
+// BASE_URL: 'http://localhost:5000/api',
 
   ENDPOINTS: {
     BLOGS: "/blog",
