@@ -1,0 +1,1 @@
+// Placeholder for auth page directory structure

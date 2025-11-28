@@ -1,261 +1,120 @@
-import React, { useState, useEffect } from "react";
-import Header from "../../layouts/common/header/header";
-import BlogList from "../../layouts/home/blog-list/blog-list";
-import BlogForm from "../../layouts/home/blog-form/blog-form";
-import WriterList from "../../layouts/home/writer-list/writer-list";
-import WriterForm from "../../layouts/home/writer-form/writer-form";
-import Modal from "../../components/modal/modal";
-import Card from "../../components/card/card";
-import LoadingSpinner from "../../components/loading-spinner/loading-spinner";
-import getBlogs from "../../service/blog/get-all-blogs";
-import { createBlog } from "../../service/blog/create-blog";
-import { updateBlog } from "../../service/blog/update-blog";
-import { deleteBlog } from "../../service/blog/delete-blog";
-import { getWriters } from "../../service/blog/get-writers";
-import { createWriter } from "../../service/blog/create-writer";
-import { updateWriter } from "../../service/blog/update-writer";
-import { deleteWriter } from "../../service/blog/delete-writer";
-import Footer from "../../layouts/common/footer/footer";
-import "./home.css";
+import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useGetAllBlogsQuery } from '../../store/api/blogApi';
+import LoadingSpinner from '../../components/loading-spinner/loading-spinner';
+import Card from '../../components/card/card';
+import Button from '../../components/button/button';
+import { formatDate, truncateText } from '../../utils/helpers/index';
+import './home.css';
+import axios from 'axios';
+import { API_CONFIG } from '../../utils/configs/api-config';
+
+// Test function for debugging
+const testDirectAPI = async () => {
+  try {
+    console.log('Testing direct API call to:', `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.BLOGS}`);
+    const response = await axios.get(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.BLOGS}`);
+    console.log('Direct API Response:', response.data);
+  } catch (apiError) {
+    console.error('Direct API Error:', apiError);
+    console.error('Error details:', apiError.response?.data || apiError.message);
+  }
+};
 
 const Home = () => {
-  // State management
-  const [blogs, setBlogs] = useState([]);
-  const [writers, setWriters] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  // Modal states
-  const [showBlogForm, setShowBlogForm] = useState(false);
-  const [showWriterForm, setShowWriterForm] = useState(false);
-  const [showBlogModal, setShowBlogModal] = useState(false);
-  const [selectedBlog, setSelectedBlog] = useState(null);
-  const [editingBlog, setEditingBlog] = useState(null);
-  const [editingWriter, setEditingWriter] = useState(null);
-
-  // Active tab state
-  const [activeTab, setActiveTab] = useState("blogs");
-
-  // Fetch initial data
+  const { data: blogsData, isLoading, error } = useGetAllBlogsQuery();
+  const blogs = blogsData?.blogs || [];
+  
+  console.log('=== HOME PAGE DEBUG ===');
+  console.log('blogsData:', blogsData);
+  console.log('blogs:', blogs);
+  console.log('isLoading:', isLoading);
+  console.log('error:', error);
+  console.log('publishedBlogs:', blogs.filter(blog => blog.isPublished));
+  
+  // Direct API test
   useEffect(() => {
-    fetchData();
+    testDirectAPI();
   }, []);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      setError("");
+  // Filter only published blogs for the home page
+  const publishedBlogs = blogs.filter(blog => blog.isPublished);
 
-      const [blogsResponse, writersResponse] = await Promise.all([
-        getBlogs(),
-        getWriters(),
-      ]);
+  if (isLoading) {
+    return <LoadingSpinner text="Loading blog posts..." />;
+  }
 
-      setBlogs(blogsResponse.data.blogs || []);
-      setWriters(writersResponse.data.writers || []);
-    } catch (err) {
-      setError("Failed to load data: " + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Blog handlers
-  const handleCreateBlog = async (blogData) => {
-    await createBlog(blogData);
-    setShowBlogForm(false);
-    fetchData(); // Refresh data
-  };
-
-  const handleUpdateBlog = async (blogData) => {
-    await updateBlog(editingBlog._id, blogData);
-    setShowBlogForm(false);
-    setEditingBlog(null);
-    fetchData(); // Refresh data
-  };
-
-  const handleDeleteBlog = async (blogId) => {
-    if (window.confirm("Are you sure you want to delete this blog?")) {
-      await deleteBlog(blogId);
-      fetchData(); // Refresh data
-    }
-  };
-
-  const handleViewBlog = (blog) => {
-    setSelectedBlog(blog);
-    setShowBlogModal(true);
-  };
-
-  const handleEditBlog = (blog) => {
-    setEditingBlog(blog);
-    setShowBlogForm(true);
-  };
-
-  // Writer handlers
-  const handleCreateWriter = async (writerData) => {
-    await createWriter(writerData);
-    setShowWriterForm(false);
-    fetchData(); // Refresh data
-  };
-
-  const handleUpdateWriter = async (writerData) => {
-    await updateWriter(editingWriter._id, writerData);
-    setShowWriterForm(false);
-    setEditingWriter(null);
-    fetchData(); // Refresh data
-  };
-
-  const handleDeleteWriter = async (writerId) => {
-    if (window.confirm("Are you sure you want to delete this writer?")) {
-      await deleteWriter(writerId);
-      fetchData(); // Refresh data
-    }
-  };
-
-  const handleEditWriter = (writer) => {
-    setEditingWriter(writer);
-    setShowWriterForm(true);
-  };
-
-  // Modal handlers
-  const handleCloseBlogForm = () => {
-    setShowBlogForm(false);
-    setEditingBlog(null);
-  };
-
-  const handleCloseWriterForm = () => {
-    setShowWriterForm(false);
-    setEditingWriter(null);
-  };
-
-  if (loading && blogs.length === 0 && writers.length === 0) {
+  if (error) {
+    console.error('Home page error details:', error);
     return (
       <div className="home-container">
-        <LoadingSpinner text="Loading blog platform..." />
+        <Card className="error-card">
+          <h2>Error Loading Blogs</h2>
+          <p>{error.message || 'Failed to load blog posts'}</p>
+          <p><strong>Error Details:</strong> {error.status || 'Unknown status'}</p>
+          <p><strong>API URL:</strong> {`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.BLOGS}`}</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+          <Button variant="outline" onClick={() => testDirectAPI()}>Test API Connection</Button>
+        </Card>
       </div>
     );
   }
 
   return (
     <div className="home-container">
-      <Header
-        onShowBlogForm={() => setShowBlogForm(true)}
-        onShowWriterForm={() => setShowWriterForm(true)}
-      />
-
-      {error && (
-        <Card className="error-banner">
-          <p>{error}</p>
-          <button onClick={fetchData}>Retry</button>
-        </Card>
-      )}
-
-      {/* Tab Navigation */}
-      <div className="tab-navigation">
-        <button
-          className={`tab-button ${activeTab === "blogs" ? "active" : ""}`}
-          onClick={() => setActiveTab("blogs")}
-        >
-          📝 Blogs ({blogs.length})
-        </button>
-        <button
-          className={`tab-button ${activeTab === "writers" ? "active" : ""}`}
-          onClick={() => setActiveTab("writers")}
-        >
-          👤 Writers ({writers.length})
-        </button>
+      <div className="home-hero">
+        <h1>Welcome to Our Blog Platform</h1>
+        <p>Discover amazing stories from our talented writers</p>
       </div>
 
-      {/* Content Area */}
-      <main className="main-content">
-        {activeTab === "blogs" && (
-          <BlogList
-            blogs={blogs}
-            onViewBlog={handleViewBlog}
-            onEditBlog={handleEditBlog}
-            onDeleteBlog={handleDeleteBlog}
-            isLoading={loading}
-          />
-        )}
+      <div className="blog-section">
+        <h2>Latest Blog Posts</h2>
+        
+        {publishedBlogs.length === 0 ? (
+          <Card className="empty-state">
+            <h3>No blog posts available yet</h3>
+            <p>Be the first to share your thoughts with our community!</p>
+            <Link to="/become-a-writer">
+              <Button>Become a Writer</Button>
+            </Link>
+          </Card>
+        ) : (
+          <div className="blog-grid">
+            {publishedBlogs.map((blog) => (
+              <Card key={blog._id} className="blog-card">
+                <div className="blog-card-header">
+                  <h3>
+                    <Link to={`/blog/${blog._id}`}>{blog.title}</Link>
+                  </h3>
+                </div>
+                
+                <div className="blog-meta">
+                  <span className="author">By {blog.writer?.name || 'Unknown'}</span>
+                  <span className="date">{formatDate(blog.createdAt)}</span>
+                </div>
 
-        {activeTab === "writers" && (
-          <WriterList
-            writers={writers}
-            onEditWriter={handleEditWriter}
-            onDeleteWriter={handleDeleteWriter}
-            isLoading={loading}
-          />
-        )}
-      </main>
+                {blog.tags && blog.tags.length > 0 && (
+                  <div className="blog-tags">
+                    {blog.tags.slice(0, 3).map((tag, index) => (
+                      <span key={index} className="tag">#{tag}</span>
+                    ))}
+                  </div>
+                )}
 
-      {/* Modals */}
-      <Modal
-        isOpen={showBlogForm}
-        onClose={handleCloseBlogForm}
-        title={editingBlog ? "Edit Blog Post" : "Write New Blog Post"}
-        size="large"
-      >
-        <BlogForm
-          onSubmit={editingBlog ? handleUpdateBlog : handleCreateBlog}
-          onCancel={handleCloseBlogForm}
-          initialData={editingBlog}
-          isEditing={!!editingBlog}
-        />
-      </Modal>
+                <div className="blog-excerpt">
+                  <p>{truncateText(blog.content, 150)}</p>
+                </div>
 
-      <Modal
-        isOpen={showWriterForm}
-        onClose={handleCloseWriterForm}
-        title={editingWriter ? "Edit Writer" : "Add New Writer"}
-        size="medium"
-      >
-        <WriterForm
-          onSubmit={editingWriter ? handleUpdateWriter : handleCreateWriter}
-          onCancel={handleCloseWriterForm}
-          initialData={editingWriter}
-          isEditing={!!editingWriter}
-        />
-      </Modal>
-
-      <Modal
-        isOpen={showBlogModal}
-        onClose={() => setShowBlogModal(false)}
-        title={selectedBlog?.title}
-        size="large"
-      >
-        {selectedBlog && (
-          <div className="blog-detail">
-            <div className="blog-meta">
-              <span className="author">By {selectedBlog.writer?.name}</span>
-              <span className="date">
-                {new Date(selectedBlog.createdAt).toLocaleDateString()}
-              </span>
-              {selectedBlog.isPublished && (
-                <span className="status published">Published</span>
-              )}
-            </div>
-
-            {selectedBlog.tags && selectedBlog.tags.length > 0 && (
-              <div className="blog-tags">
-                {selectedBlog.tags.map((tag, index) => (
-                  <span key={index} className="tag">
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            <div className="blog-content">
-              {selectedBlog.content.split("\n").map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
-              ))}
-            </div>
+                <div className="blog-card-footer">
+                  <Link to={`/blog/${blog._id}`}>
+                    <Button variant="outline">Read More</Button>
+                  </Link>
+                </div>
+              </Card>
+            ))}
           </div>
         )}
-      </Modal>
-     
-
-      <Footer />
+      </div>
     </div>
   );
 };
