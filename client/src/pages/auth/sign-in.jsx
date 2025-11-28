@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { useGetAllWritersQuery } from "../../store/api/blogApi";
+import { useGetAllWritersQuery, useLoginWriterMutation } from "../../store/api/blogApi";
 import { setCredentials } from "../../store/slices/authSlice";
-import { verifyPassword, getPasswordHash } from "../../utils/helpers/index";
 import Card from "../../components/card/card";
 import Button from "../../components/button/button";
 import LoadingSpinner from "../../components/loading-spinner/loading-spinner";
@@ -26,6 +25,7 @@ const SignIn = () => {
     error: writersError,
     refetch: refetchWriters,
   } = useGetAllWritersQuery();
+  const [loginWriter, { isLoading: loginLoading }] = useLoginWriterMutation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -88,43 +88,37 @@ const SignIn = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const authenticateUser = async () => {
-    // Try multiple approaches to get writers data
-    let writersList = [];
-    
+  const authenticateUser = async (email, password) => {
     try {
-      // Approach 1: Use RTK Query data if available
-      if (writersData && !writersError) {
-        writersList = Array.isArray(writersData) 
-          ? writersData 
-          : writersData?.writers || [];
-      }
+      // Use the new login endpoint
+      const response = await loginWriter({
+        email: email.trim().toLowerCase(),
+        password: password
+      }).unwrap();
       
-      // Approach 2: If no data from RTK Query, try direct API call
-      if (writersList.length === 0) {
-        const response = await axios.get(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.WRITERS}`);
-        writersList = response.data?.data?.writers || [];
-      }
-      
-      // Approach 3: If still no data, refetch RTK Query
-      if (writersList.length === 0) {
-        await refetchWriters();
-        if (writersData) {
-          writersList = Array.isArray(writersData) 
-            ? writersData 
-            : writersData?.writers || [];
-        }
+      // Check if the response contains user data
+      if (response && response.writer) {
+        return response.writer;
+      } else if (response && response.data && response.data.writer) {
+        return response.data.writer;
+      } else {
+        throw new Error("Invalid response from server");
       }
       
     } catch (error) {
-      throw new Error("Unable to connect to server. Please try again.");
+      // Handle different error types
+      if (error.status === 404) {
+        throw new Error("No account found with this email address. Please sign up first.");
+      } else if (error.status === 401) {
+        throw new Error("Invalid password. Please check your password and try again.");
+      } else if (error.status === 400) {
+        throw new Error("Invalid email or password format.");
+      } else if (error.message) {
+        throw new Error(error.message);
+      } else {
+        throw new Error("Login failed. Please check your credentials and try again.");
+      }
     }
-    
-    if (!writersList || writersList.length === 0) {
-      throw new Error("No registered users found. Please sign up first.");
-    }
-    
-    return writersList;
   };
 
   const handleSubmit = async (e) => {
@@ -138,28 +132,10 @@ const SignIn = () => {
     }
 
     try {
-      const writers = await authenticateUser();
-      const normalizedEmail = formData.email.trim().toLowerCase();
+      // Use the new backend authentication
+      const writer = await authenticateUser(formData.email, formData.password);
 
-      // Find writer by email
-      const writer = writers.find(w => w.email.toLowerCase() === normalizedEmail);
-
-      if (!writer) {
-        throw new Error("No account found with this email address. Please sign up first.");
-      }
-
-      // Validate password
-      const storedPasswordHash = getPasswordHash(writer.email);
-      if (!storedPasswordHash) {
-        throw new Error("No password found for this account. Please sign up again.");
-      }
-
-      const isPasswordValid = await verifyPassword(formData.password, storedPasswordHash);
-      if (!isPasswordValid) {
-        throw new Error("Invalid password. Please check your password and try again.");
-      }
-
-      // Store credentials in Redux and localStorage
+      // Store credentials in Redux
       dispatch(
         setCredentials({
           writerId: writer._id,
@@ -287,9 +263,9 @@ const SignIn = () => {
             type="submit"
             variant="primary"
             className="auth-submit"
-            disabled={isSubmitting || writersLoading || !!writersError}
+            disabled={isSubmitting || writersLoading || loginLoading || !!writersError}
           >
-            {isSubmitting || writersLoading ? "Signing In..." : "Sign In"}
+            {isSubmitting || writersLoading || loginLoading ? "Signing In..." : "Sign In"}
           </Button>
         </form>
 
