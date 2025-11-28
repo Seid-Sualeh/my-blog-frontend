@@ -103,6 +103,12 @@ const Home = () => {
     fetchBlogsDirectly();
   }, []);
 
+  // RTK Query data
+  const blogs = blogsData?.blogs || [];
+  
+  // Use direct data if RTK Query fails
+  const displayBlogs = directBlogs.length > 0 ? directBlogs : blogs;
+
   // Extract unique categories from blog tags
   const availableCategories = useMemo(() => {
     const allTags = displayBlogs
@@ -171,19 +177,8 @@ const Home = () => {
     navigate(`/blog/${writerId}/write?edit=${blogId}`);
   };
   
-  // RTK Query data
-  const blogs = blogsData?.blogs || [];
-  
-  // Use direct data if RTK Query fails
-  const displayBlogs = directBlogs.length > 0 ? directBlogs : blogs;
   const isDisplayLoading = isLoading || directLoading;
   const displayError = error || directError;
-
-  // Data is fetched via RTK Query hook above (`useGetAllBlogsQuery`).
-  // If you need writers data here, use `useGetAllWritersQuery()` from the API slice.
-
-  // Filter only published blogs for the home page
-  const publishedBlogs = displayBlogs.filter((blog) => blog.isPublished);
   
   if (isLoading) {
     return <LoadingSpinner text="Loading blog posts..." />;
@@ -223,21 +218,187 @@ const Home = () => {
 
       <div className="blog-section">
         <h2>Latest Blog Posts</h2>
+        
+        {/* Filter Toolbar */}
+        <div className="filter-toolbar" style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "16px",
+          marginBottom: "24px",
+          padding: "20px",
+          backgroundColor: "#f8f9fa",
+          borderRadius: "8px",
+          border: "1px solid #e9ecef"
+        }}>
+          <div style={{ flex: 1, minWidth: "220px" }}>
+            <label
+              htmlFor="search-articles"
+              style={{ 
+                display: "block", 
+                fontWeight: "500", 
+                marginBottom: "4px",
+                fontSize: "14px",
+                color: "#495057"
+              }}
+            >
+              Search Articles
+            </label>
+            <input
+              id="search-articles"
+              type="text"
+              placeholder="Type to search..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px 12px",
+                borderRadius: "6px",
+                border: "1px solid #ced4da",
+                fontSize: "15px",
+                outline: "none",
+                transition: "border-color 0.15s ease-in-out"
+              }}
+              onFocus={(e) => e.target.style.borderColor = "#80bdff"}
+              onBlur={(e) => e.target.style.borderColor = "#ced4da"}
+            />
+          </div>
+          <div style={{ minWidth: "180px" }}>
+            <label
+              htmlFor="filter-article-type"
+              style={{ 
+                display: "block", 
+                fontWeight: "500", 
+                marginBottom: "4px",
+                fontSize: "14px",
+                color: "#495057"
+              }}
+            >
+              Articles
+            </label>
+            <select
+              id="filter-article-type"
+              value={articleType}
+              onChange={(e) => setArticleType(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px 12px",
+                borderRadius: "6px",
+                border: "1px solid #ced4da",
+                fontSize: "15px",
+                outline: "none",
+                backgroundColor: "white",
+                cursor: "pointer"
+              }}
+            >
+              <option value="all">All Blogs</option>
+              <option value="popular">Popular Blogs</option>
+              <option value="recent">Recent Blogs</option>
+            </select>
+          </div>
+          <div style={{ minWidth: "180px" }}>
+            <label
+              htmlFor="filter-category"
+              style={{ 
+                display: "block", 
+                fontWeight: "500", 
+                marginBottom: "4px",
+                fontSize: "14px",
+                color: "#495057"
+              }}
+            >
+              Category
+            </label>
+            <select
+              id="filter-category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px 12px",
+                borderRadius: "6px",
+                border: "1px solid #ced4da",
+                fontSize: "15px",
+                outline: "none",
+                backgroundColor: "white",
+                cursor: "pointer"
+              }}
+            >
+              {availableCategories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat === "all" ? "All Categories" : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
-        {publishedBlogs.length === 0 ? (
+        {/* Results Header */}
+        <div style={{
+          marginBottom: "20px",
+          padding: "0 4px"
+        }}>
+          <h3 style={{
+            margin: "0",
+            fontSize: "18px",
+            color: "#495057",
+            fontWeight: "500"
+          }}>
+            {category === "all"
+              ? `Showing ${filteredBlogs.length} articles`
+              : `${category.charAt(0).toUpperCase() + category.slice(1)} Articles (${filteredBlogs.length})`}
+            {articleType !== "all" && 
+              ` - ${
+                articleType.charAt(0).toUpperCase() + articleType.slice(1)
+              }`
+            }
+          </h3>
+        </div>
+
+        {filteredBlogs.length === 0 ? (
           <Card className="empty-state">
-            <h3>No blog posts available yet</h3>
-            <p>Be the first to share your thoughts with our community!</p>
+            <h3>
+              {search || category !== "all" || articleType !== "all" 
+                ? "No articles found" 
+                : "No blog posts available yet"
+              }
+            </h3>
+            <p>
+              {search || category !== "all" || articleType !== "all"
+                ? "Try adjusting your search criteria or filters."
+                : "Be the first to share your thoughts with our community!"
+              }
+            </p>
             <div style={{marginTop: '12px'}}>
-              <Link to="/become-a-writer">
-                <Button>Become a Writer</Button>
-              </Link>
-              <Button variant="outline" onClick={fetchBlogsDirectly} style={{marginLeft: '8px'}}>Refresh Blogs</Button>
+              {search || category !== "all" || articleType !== "all" ? (
+                <>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setSearch("");
+                      setCategory("all");
+                      setArticleType("all");
+                    }}
+                    style={{marginRight: '8px'}}
+                  >
+                    Clear Filters
+                  </Button>
+                  <Button variant="outline" onClick={fetchBlogsDirectly}>Refresh Blogs</Button>
+                </>
+              ) : (
+                <>
+                  <Link to="/become-a-writer">
+                    <Button>Become a Writer</Button>
+                  </Link>
+                  <Button variant="outline" onClick={fetchBlogsDirectly} style={{marginLeft: '8px'}}>Refresh Blogs</Button>
+                </>
+              )}
             </div>
           </Card>
         ) : (
           <div className="blog-grid">
-            {publishedBlogs.map((blog) => {
+            {filteredBlogs.map((blog) => {
               const isAuthor = isAuthenticated && blog.writer?._id === writerId;
               
               return (

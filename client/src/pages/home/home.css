@@ -194,6 +194,31 @@
   color: #666;
 }
 
+/* Filter Toolbar Styles */
+.filter-toolbar {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.filter-toolbar input,
+.filter-toolbar select {
+  transition: all 0.2s ease;
+}
+
+.filter-toolbar input:focus,
+.filter-toolbar select:focus {
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.15);
+}
+
+.filter-toolbar input:hover,
+.filter-toolbar select:hover {
+  border-color: #adb5bd;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .home-hero h1 {
@@ -213,5 +238,15 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
+  }
+
+  .filter-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .filter-toolbar > div {
+    min-width: auto !important;
   }
 }
